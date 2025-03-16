@@ -1,29 +1,53 @@
 export const FEATURED_IMAGES = [
 	{
-		url: 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=1500&q=80',
-		title: 'Sunset Over Mountains',
-		description: 'A breathtaking view of the sun setting over rugged mountains'
+		url: 'https://i.imgur.com/TkklT6N.jpg',
+		title: 'Featured Shot 1',
+		description: 'Professional photography capturing moments that last a lifetime'
 	},
 	{
-		url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1500&q=80',
-		title: 'City Reflections',
-		description: 'Modern urban skyline with dazzling reflections'
+		url: 'https://i.imgur.com/eZnzOPS.jpg',
+		title: 'Featured Shot 2',
+		description: 'Artistic perspective through the lens of experience'
 	}
 ] as const;
 
 export const GALLERY_IMAGES = [
 	{
-		category: 'Nature',
+		category: 'Portraits',
 		images: [
-			{ url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80', title: 'Ocean View' },
-			{ url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=800&q=80', title: 'Forest Waterfall' }
+			{ url: 'https://i.imgur.com/WcoD4PT.jpg', title: 'Portrait Study' },
+			{ url: 'https://i.imgur.com/gPceaBv.jpg', title: 'Environmental Portrait' },
+			{ url: 'https://i.imgur.com/xwZnt0wM.jpg', title: 'Studio Lighting' },
+			{ url: 'https://i.imgur.com/EmkcmxZ.jpg', title: 'Natural Light Portrait' },
+			{ url: 'https://i.imgur.com/ykqtpwb.jpg', title: 'Character Study' }
+		]
+	},
+	{
+		category: 'Landscapes',
+		images: [
+			{ url: 'https://i.imgur.com/aC9y2Jc.jpg', title: 'Scenic Vista' },
+			{ url: 'https://i.imgur.com/iQakYCz.jpg', title: 'Natural Beauty' },
+			{ url: 'https://i.imgur.com/3aG8lNQ.jpg', title: 'Golden Hour' },
+			{ url: 'https://i.imgur.com/jXL1WOM.jpg', title: 'Dramatic Skies' }
 		]
 	},
 	{
 		category: 'Urban',
 		images: [
-			{ url: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80', title: 'City Lights' },
-			{ url: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=800&q=80', title: 'Modern Architecture' }
+			{ url: 'https://i.imgur.com/KNLwMV0.jpg', title: 'City Life' },
+			{ url: 'https://i.imgur.com/ojHgfqD.jpg', title: 'Street Photography' },
+			{ url: 'https://i.imgur.com/KFBKNIE.jpg', title: 'Urban Exploration' }
+		]
+	},
+	{
+		category: 'Events',
+		images: [
+			{ url: 'https://i.imgur.com/65MecBy.jpg', title: 'Special Moments' },
+			{ url: 'https://i.imgur.com/hnfK4Lt.jpg', title: 'Celebration' },
+			{ url: 'https://i.imgur.com/fsDbUZA.jpg', title: 'Gathering' },
+			{ url: 'https://i.imgur.com/69yR7W7.jpg', title: 'Candid Moments' },
+			{ url: 'https://i.imgur.com/uKHZ0DD.jpg', title: 'Event Coverage' },
+			{ url: 'https://i.imgur.com/bdRsoZi.jpg', title: 'Documentary' }
 		]
 	}
 ];

@@ -6,7 +6,6 @@ const nextConfig = {
     config.resolve.extensions = ['.ts', '.tsx', '.js', '.jsx']
     return config
   },
-  // Removed "domains" configuration as remotePatterns are used now
   images: {
     remotePatterns: [
       {
@@ -15,6 +14,7 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+    domains: ['i.imgur.com'],
   },
 }
 
