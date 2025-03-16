@@ -1,0 +1,8 @@
+{
+  "name": "chrisocphoto",
+  "version": 2,
+  "public": true,
+  "builds": [
+    { "src": "package.json", "use": "@vercel/next" }
+  ]
+}

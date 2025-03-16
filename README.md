@@ -1,4 +1,4 @@
-# ChrisOC Photography
+# C H R I S O C P H O T O 
 
 A photography portfolio website built with Next.js.
 
