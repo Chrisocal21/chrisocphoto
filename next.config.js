@@ -6,6 +6,14 @@ const nextConfig = {
   distDir: 'dist',
   images: {
     unoptimized: true
+  },
+  assetPrefix: process.env.NODE_ENV === 'production' 
+    ? 'https://chrisocphoto.vercel.app' 
+    : undefined,
+  env: {
+    SITE_URL: process.env.NODE_ENV === 'production'
+      ? 'https://chrisocphoto.vercel.app'
+      : 'http://localhost:3000'
   }
 };
 
