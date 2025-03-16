@@ -6,10 +6,23 @@ const { execSync } = require('child_process');
 const outputDir = process.env.OUTPUT_DIR || 'dist';
 const publicDir = process.env.PUBLIC_DIR || 'public';
 
-// Create output directory if it doesn't exist
-if (!fs.existsSync(outputDir)) {
+// Clean output directory if it exists
+if (fs.existsSync(outputDir)) {
+  try {
+    fs.rmSync(outputDir, { recursive: true, force: true });
+    console.log(`Cleaned existing output directory: ${outputDir}`);
+  } catch (error) {
+    console.error(`Error cleaning directory: ${error.message}`);
+  }
+}
+
+// Create output directory
+try {
   fs.mkdirSync(outputDir, { recursive: true });
   console.log(`Created output directory: ${outputDir}`);
+} catch (error) {
+  console.error(`Error creating directory: ${error.message}`);
+  process.exit(1);
 }
 
 // Copy files from public to output directory
@@ -18,12 +31,12 @@ try {
   if (process.platform === 'win32') {
     execSync(`xcopy /E /I /Y "${publicDir}" "${outputDir}"`);
   } else {
-    // For Unix-like systems
+    // For Unix-like systems (including Vercel)
     execSync(`cp -r ${publicDir}/* ${outputDir}/`);
   }
   console.log(`Successfully copied files from ${publicDir} to ${outputDir}`);
 } catch (error) {
-  console.error('Build failed:', error);
+  console.error('Build failed:', error.message);
   process.exit(1);
 }
 
