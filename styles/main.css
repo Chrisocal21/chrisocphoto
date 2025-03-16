@@ -1,0 +1,12 @@
+// ...existing code...
+
+/* Add or modify the selector for your "Enjoy The Views" button */
+.enjoy-views-button, 
+#enjoy-views-button, 
+.btn-enjoy-views /* use whichever selector matches your button */ {
+    /* ...existing code... */
+    margin-bottom: 4rem; /* Increased from 2rem for more space */
+    /* ...existing code... */
+}
+
+// ...existing code...
