@@ -1,6 +1,6 @@
 export const FEATURED_IMAGES = [
 	{
-		url: 'https://images.unsplash.com/photo-1504197885-0e21e522f9ac?auto=format&fit=crop&w=1500&q=80',
+		url: 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=1500&q=80',
 		title: 'Sunset Over Mountains',
 		description: 'A breathtaking view of the sun setting over rugged mountains'
 	},
@@ -23,7 +23,7 @@ export const GALLERY_IMAGES = [
 		category: 'Urban',
 		images: [
 			{ url: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=800&q=80', title: 'City Lights' },
-			{ url: 'https://images.unsplash.com/photo-1491895200222-0fc4a2b350d3?auto=format&fit=crop&w=800&q=80', title: 'Modern Architecture' }
+			{ url: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=800&q=80', title: 'Modern Architecture' }
 		]
 	}
 ];
