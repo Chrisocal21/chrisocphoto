@@ -14,7 +14,7 @@ export default function About() {
                 {/* Replace with your headshot image */}
                 <div className="bg-gray-200 h-80 w-full relative">
                   <Image 
-                    src="/images/profile.jpg" 
+                    src="/images/placeholder/image-placeholder.jpg" 
                     alt="Chris OC - Photographer" 
                     fill
                     className="object-cover"

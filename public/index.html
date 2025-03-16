@@ -9,6 +9,24 @@
     <meta property="og:title" content="Chris OC Photography">
     <meta property="og:description" content="Professional photography portfolio">
     <link rel="canonical" href="https://chrisocphoto.vercel.app">
+    <!-- Make sure CSS is loading -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if CSS is loaded
+        const styles = document.styleSheets;
+        let cssLoaded = false;
+        for (let i = 0; i < styles.length; i++) {
+            if (styles[i].href && styles[i].href.includes('main.css')) {
+                cssLoaded = true;
+                console.log('CSS loaded successfully');
+                break;
+            }
+        }
+        if (!cssLoaded) {
+            console.error('CSS failed to load. Check path: css/main.css');
+        }
+    });
+    </script>
 </head>
 <body>
     <div class="header"></div>
@@ -21,10 +39,10 @@
     <div id="sidebarMenu">
         <ul class="sidebarMenuInner">
             <li>Chris OC Photography <span>Portfolio</span></li>
-            <li><a href="#" target="_blank">Home</a></li>
-            <li><a href="#" target="_blank">Portfolio</a></li>
-            <li><a href="#" target="_blank">About</a></li>
-            <li><a href="#" target="_blank">Contact</a></li>
+            <li><a href="/" target="_self">Home</a></li>
+            <li><a href="/portfolio" target="_self">Portfolio</a></li>
+            <li><a href="/about" target="_self">About</a></li>
+            <li><a href="/contact" target="_self">Contact</a></li>
         </ul>
     </div>
     

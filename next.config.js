@@ -2,20 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  webpack: (config) => {
-    config.resolve.extensions = ['.ts', '.tsx', '.js', '.jsx']
-    return config
-  },
+  output: 'export',
+  distDir: 'dist',
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
-      },
-    ],
-    domains: ['i.imgur.com'],
-  },
-}
+    unoptimized: true
+  }
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

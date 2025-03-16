@@ -1,21 +1,22 @@
-import Layout from '@/components/Layout'
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { FEATURED_IMAGES } from '@/data/photos'
+import Head from 'next/head';
+import { useState, useEffect } from 'react';
+import Layout from '@/components/Layout';
+import Image from 'next/image';
+import Link from 'next/link';
+import { FEATURED_IMAGES } from '@/data/photos';
 
 export default function Home() {
-  const [current, setCurrent] = useState(0)
+  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % FEATURED_IMAGES.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
+      setCurrent((prev) => (prev + 1) % FEATURED_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <Layout>
+    <Layout title="Chris OC Photography">
       <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-black via-gray-900 to-black">
         <div className="relative z-10 flex flex-col items-center text-center px-4 pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-12 md:pb-16">
           <h1 className="neo-text text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 md:mb-8 pulse-subtle">
@@ -36,13 +37,9 @@ export default function Home() {
                     key={image.title}
                     className={`absolute inset-0 transition-opacity duration-1000 ${index === current ? 'opacity-100' : 'opacity-0'}`}
                   >
-                    <Image
-                      src={image.url}
-                      alt={image.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      quality={90}
-                    />
+                    <div className="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400">
+                      Image: {image.title}
+                    </div>
                   </div>
                 ))}
                 
@@ -86,5 +83,5 @@ export default function Home() {
         </div>
       </div>
     </Layout>
-  )
+  );
 }

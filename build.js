@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// Get output directory from environment or default to 'dist'
-const outputDir = process.env.OUTPUT_DIR || 'dist';
-const publicDir = process.env.PUBLIC_DIR || 'public';
+// Get output directory from environment or use 'dist' by default
+const outputDir = 'dist';
+const publicDir = 'public';
 
 // Clean output directory if it exists
 if (fs.existsSync(outputDir)) {
@@ -34,6 +34,20 @@ try {
     // For Unix-like systems (including Vercel)
     execSync(`cp -r ${publicDir}/* ${outputDir}/`);
   }
+  
+  // Verify index.html was copied correctly
+  if (fs.existsSync(path.join(outputDir, 'index.html'))) {
+    console.log('index.html was successfully copied to output directory');
+  } else {
+    console.error('ERROR: index.html was not copied to output directory');
+    // Try to copy it specifically
+    fs.copyFileSync(
+      path.join(publicDir, 'index.html'), 
+      path.join(outputDir, 'index.html')
+    );
+    console.log('Manually copied index.html to output directory');
+  }
+  
   console.log(`Successfully copied files from ${publicDir} to ${outputDir}`);
 } catch (error) {
   console.error('Build failed:', error.message);

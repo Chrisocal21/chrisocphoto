@@ -1,13 +1,11 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "build.js", "use": "@vercel/node" },
-    { "src": "public/**", "use": "@vercel/static" }
-  ],
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "routes": [
     { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "alias": ["chrisocphoto.vercel.app"]
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
 }
