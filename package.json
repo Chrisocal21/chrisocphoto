@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "manual-deploy": "node manual-deploy.js",
+    "update-cli": "npm install -g vercel@latest"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -33,3 +35,4 @@
     "typescript": "^5.3.3"
   }
 }
+
