@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-black text-white;
+  }
+}
+
+@layer components {
+  .ios-blur {
+    @apply backdrop-blur-2xl bg-white/[0.02] border border-white/10;
+  }
+  
+  .ios-button {
+    @apply rounded-2xl bg-accent-500 px-6 py-3 font-medium text-white
+           transition-all duration-300 hover:bg-accent-600 
+           active:scale-[0.97] shadow-lg shadow-accent-500/20;
+  }
+  
+  .ios-card {
+    @apply ios-blur rounded-3xl shadow-xl;
+  }
+  
+  .ios-input {
+    @apply ios-blur rounded-2xl px-4 py-3 text-white placeholder:text-white/40
+           focus:ring-2 focus:ring-accent-500 focus:outline-none;
+  }
+
+  .neo-blur {
+    @apply backdrop-blur-2xl bg-white/[0.02] border border-white/10;
+  }
+  
+  .neo-card {
+    @apply neo-blur rounded-[2rem] hover:shadow-2xl hover:bg-black/25
+           transition-all duration-500 hover:scale-[1.02];
+  }
+  
+  .neo-button {
+    @apply rounded-2xl bg-gradient-to-b from-white/20 to-white/5
+           backdrop-blur-xl border border-white/20 px-8 py-4
+           hover:scale-[1.02] active:scale-[0.98] transition-all duration-300
+           shadow-lg hover:shadow-xl text-white/90 hover:text-white
+           hover:border-white/30;
+  }
+  
+  .neo-input {
+    @apply neo-blur rounded-2xl px-6 py-4 text-white/90
+           placeholder:text-white/40 w-full outline-none
+           focus:ring-2 focus:ring-white/30 transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  .ios-gradient {
+    @apply bg-gradient-to-b from-white/[0.15] to-white/[0.05];
+  }
+  
+  .ios-text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r 
+           from-accent-500 to-purple-500;
+  }
+  
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .backdrop-blur {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .photo-hover {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-xl;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-md bg-white/10 border border-white/20 shadow-2xl;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80;
+  }
+
+  .neo-gradient {
+    @apply bg-gradient-to-br from-white/10 via-white/5 to-transparent;
+  }
+  
+  .neo-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r 
+           from-white via-white/90 to-white/70;
+  }
+  
+  .neo-glow {
+    @apply shadow-[0_0_30px_rgba(255,255,255,0.1)];
+  }
+}
+
+/* Additional iOS-style animations */
+@keyframes slideIn {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Photo animation */
+@keyframes photoZoom {
+  from {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.photo-enter {
+  animation: photoZoom 0.6s ease-out forwards;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.float-in {
+  animation: floatIn 0.5s ease-out forwards;
+}
+
+@keyframes subtlePulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.005); }
+}
+
+.pulse-subtle {
+  animation: subtlePulse 4s ease-in-out infinite;
+}
