@@ -4,6 +4,7 @@
   "description": "Chris OC Photography Website",
   "main": "index.js",
   "private": true,
+  "homepage": "https://chrisocphoto.vercel.app",
   "scripts": {
     "dev": "serve public",
     "build": "node build.js",

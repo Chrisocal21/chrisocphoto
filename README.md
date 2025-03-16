@@ -1,6 +1,10 @@
-# C H R I S O C P H O T O 
+# Chris OC Photography
 
-A photography portfolio website built with Next.js.
+A professional photography portfolio website.
+
+## Live Site
+
+The site is deployed at [https://chrisocphoto.vercel.app](https://chrisocphoto.vercel.app)
 
 ## Features
 
@@ -11,11 +15,10 @@ A photography portfolio website built with Next.js.
 
 ## Development
 
-```bash
-# Install dependencies
-npm install
+To run the site locally:
 
-# Run the development server
+```bash
+npm install
 npm run dev
 ```
 
@@ -28,4 +31,4 @@ npm run dev
 
 ## Deployment
 
-The site is configured for easy deployment to Vercel or any platform supporting Next.js.
+This site is automatically deployed to Vercel when changes are pushed to the main branch.
