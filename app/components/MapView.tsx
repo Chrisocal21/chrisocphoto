@@ -98,8 +98,8 @@ export default function MapView() {
     if (feature.layer?.id === 'clusters') {
       const clusterId = feature.properties?.cluster_id;
       const source = mapRef.current?.getSource('locations') as GeoJSONSource;
-      source.getClusterExpansionZoom(clusterId, (err: Error | null | undefined, zoom: number) => {
-        if (err) return;
+      source.getClusterExpansionZoom(clusterId, (err: Error | null | undefined, zoom: number | null | undefined) => {
+        if (err || zoom == null) return;
         const coords = (feature.geometry as Point).coordinates as [number, number];
         mapRef.current?.easeTo({ center: coords, zoom: zoom + 0.5, duration: 400 });
       });
