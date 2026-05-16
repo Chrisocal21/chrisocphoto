@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import Map, { Source, Layer } from 'react-map-gl/mapbox';
-import type { MapRef, MapLayerMouseEvent } from 'react-map-gl/mapbox';
+import type { MapRef, MapMouseEvent } from 'react-map-gl/mapbox';
 import type { CircleLayer, SymbolLayer, GeoJSONSource } from 'mapbox-gl';
 import type { Point } from 'geojson';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -90,7 +90,7 @@ export default function MapView() {
   const [cursor, setCursor] = useState('grab');
   const mapRef = useRef<MapRef>(null);
 
-  const onClick = useCallback((e: MapLayerMouseEvent) => {
+  const onClick = useCallback((e: MapMouseEvent) => {
     const features = e.features;
     if (!features?.length) return;
     const feature = features[0];
