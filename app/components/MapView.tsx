@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useRef } from 'react';
 import Map, { Source, Layer } from 'react-map-gl/mapbox';
-import type { MapRef, GeoJSONSource, MapLayerMouseEvent } from 'react-map-gl/mapbox';
-import type { CircleLayer, SymbolLayer } from 'mapbox-gl';
+import type { MapRef, MapLayerMouseEvent } from 'react-map-gl/mapbox';
+import type { CircleLayer, SymbolLayer, GeoJSONSource } from 'mapbox-gl';
 import type { Point } from 'geojson';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MOCK_LOCATIONS } from '../data/locations';
