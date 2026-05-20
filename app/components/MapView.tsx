@@ -90,6 +90,9 @@ export default function MapView() {
   const [cursor, setCursor] = useState('grab');
   const mapRef = useRef<MapRef>(null);
 
+  const onMouseEnter = useCallback(() => setCursor('pointer'), []);
+  const onMouseLeave = useCallback(() => setCursor('grab'), []);
+
   const onClick = useCallback((e: MapMouseEvent) => {
     const features = e.features;
     if (!features?.length) return;
@@ -120,8 +123,8 @@ export default function MapView() {
         mapboxAccessToken={MAPBOX_TOKEN}
         interactiveLayerIds={['clusters', 'pins']}
         onClick={onClick}
-        onMouseEnter={() => setCursor('pointer')}
-        onMouseLeave={() => setCursor('grab')}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         cursor={cursor}
         minZoom={2}
       >
