@@ -1,25 +1,17 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import Map, { Source, Layer } from 'react-map-gl/mapbox';
 import type { MapRef, MapMouseEvent } from 'react-map-gl/mapbox';
 import type { CircleLayer, SymbolLayer, GeoJSONSource } from 'mapbox-gl';
 import type { Point } from 'geojson';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { MOCK_LOCATIONS } from '../data/locations';
 import type { Location } from '../data/locations';
+import { rowsToLocations } from '@/lib/photos';
+import type { PhotoRow } from '@/lib/photos';
 import PhotoViewer from './PhotoViewer';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
-
-const geojson = {
-  type: 'FeatureCollection' as const,
-  features: MOCK_LOCATIONS.map((loc) => ({
-    type: 'Feature' as const,
-    geometry: { type: 'Point' as const, coordinates: [loc.lng, loc.lat] },
-    properties: { id: loc.id, photoCount: loc.photos.length },
-  })),
-};
 
 // Cluster outer glow
 const clusterGlowLayer: CircleLayer = {
@@ -86,9 +78,26 @@ const pinLayer: CircleLayer = {
 };
 
 export default function MapView() {
+  const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [cursor, setCursor] = useState('grab');
   const mapRef = useRef<MapRef>(null);
+
+  useEffect(() => {
+    fetch('/api/photos')
+      .then((r) => r.json())
+      .then((rows: PhotoRow[]) => setLocations(rowsToLocations(rows)))
+      .catch(console.error);
+  }, []);
+
+  const geojson = useMemo(() => ({
+    type: 'FeatureCollection' as const,
+    features: locations.map((loc) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [loc.lng, loc.lat] },
+      properties: { id: loc.id, photoCount: loc.photos.length },
+    })),
+  }), [locations]);
 
   const onMouseEnter = useCallback(() => setCursor('pointer'), []);
   const onMouseLeave = useCallback(() => setCursor('grab'), []);
@@ -108,10 +117,10 @@ export default function MapView() {
       });
     } else if (feature.layer?.id === 'pins') {
       const id = feature.properties?.id;
-      const location = MOCK_LOCATIONS.find((l) => l.id === id);
+      const location = locations.find((l) => l.id === id);
       if (location) setSelectedLocation(location);
     }
-  }, []);
+  }, [locations]);
 
   return (
     <>

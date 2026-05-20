@@ -1,28 +1,39 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Menu from './components/Menu';
-import { MOCK_LOCATIONS } from './data/locations';
 import type { Location, Photo } from './data/locations';
 import PhotoViewer from './components/PhotoViewer';
+import { rowsToLocations } from '@/lib/photos';
+import type { PhotoRow } from '@/lib/photos';
 
 const PER_PAGE = 9;
 
-const allPhotos: { photo: Photo; location: Location }[] = MOCK_LOCATIONS.flatMap((loc) =>
-  loc.photos.map((photo) => ({ photo, location: loc }))
-);
-
-const pages: { photo: Photo; location: Location }[][] = [];
-for (let i = 0; i < allPhotos.length; i += PER_PAGE) {
-  pages.push(allPhotos.slice(i, i + PER_PAGE));
-}
-
 export default function Home() {
+  const [locations, setLocations] = useState<Location[]>([]);
   const [selected, setSelected] = useState<{ location: Location; photoId: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const dragStart = useRef<number | null>(null);
   const isDragging = useRef(false);
+
+  useEffect(() => {
+    fetch('/api/photos')
+      .then((r) => r.json())
+      .then((rows: PhotoRow[]) => setLocations(rowsToLocations(rows)))
+      .catch(console.error);
+  }, []);
+
+  const allPhotos = useMemo(
+    () => locations.flatMap((loc) => loc.photos.map((photo) => ({ photo, location: loc }))),
+    [locations],
+  );
+
+  const pages = useMemo(() => {
+    const p: { photo: Photo; location: Location }[][] = [];
+    for (let i = 0; i < allPhotos.length; i += PER_PAGE) p.push(allPhotos.slice(i, i + PER_PAGE));
+    return p;
+  }, [allPhotos]);
 
   const goToPage = useCallback((page: number) => {
     const clamped = Math.max(0, Math.min(page, pages.length - 1));

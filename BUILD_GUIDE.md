@@ -62,6 +62,8 @@ CREATE TABLE photos (
   lat REAL NOT NULL,
   lng REAL NOT NULL,
   location_name TEXT,
+  caption TEXT,
+  status TEXT DEFAULT 'published',  -- 'draft' | 'published'
   date_taken TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
@@ -76,7 +78,7 @@ CREATE TABLE photos (
 | `/` | **Main view** — fullscreen 3×3 photo grid, all photos, horizontal swipe |
 | `/map` | Secondary view — fullscreen Mapbox dark map, all location pins |
 | `/grid` | Redirects to `/` |
-| `/admin` | Password-protected upload interface |
+| `/admin` | Password-protected interface — **Upload** tab (drag-and-drop) + **Library** tab (edit all photos) |
 | `/admin/upload` | Drag-and-drop photo uploader |
 | `/api/photos` | GET all photo metadata for map + grid rendering |
 | `/api/upload` | POST — handles upload to R2, writes to D1 |
@@ -106,8 +108,11 @@ CREATE TABLE photos (
 
 ---
 
-## Admin Upload Interface
+## Admin Interface
 
+The admin page (`/admin`) is tabbed — **Upload** and **Library**.
+
+### Upload Tab
 - Private route, password protected via simple env var check (no full auth system needed)
 - Drag and drop or file picker, multi-select supported
 - On drop: EXIF parsed immediately, shows preview + detected location name + date
@@ -116,6 +121,27 @@ CREATE TABLE photos (
 - Chris can edit location name before confirming
 - Upload button sends to R2 + D1
 - Progress indicator per photo
+
+### Library Tab
+- Shows all photos grouped by location
+- **Location name** — editable inline; changing it updates the name for the whole location group
+- **Caption** — editable inline per photo (optional, shown in viewer if set)
+- **Status** — toggle each photo between `live` (published) and `draft`; draft photos are not served to the public
+- **EXIF summary** — aperture / shutter / ISO shown on row hover
+- Edits persist to `localStorage` key `chrisocphoto_admin` during the prototype phase; will write through to D1 when the backend is wired up
+
+### TypeScript Data Model
+```ts
+type Photo = {
+  id: string;
+  url: string;
+  thumbUrl: string;
+  date: string;
+  caption?: string;
+  status?: 'draft' | 'published';
+  exif?: Exif;
+};
+```
 
 ---
 
@@ -156,12 +182,15 @@ CREATE TABLE photos (
   lat REAL NOT NULL,
   lng REAL NOT NULL,
   location_name TEXT,
+  caption TEXT,
+  status TEXT DEFAULT 'published',  -- 'draft' | 'published'
   date_taken TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE INDEX idx_photos_coords ON photos(lat, lng);
 CREATE INDEX idx_photos_date ON photos(date_taken);
+CREATE INDEX idx_photos_status ON photos(status);
 ```
 
 ### Migration Files

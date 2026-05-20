@@ -15,6 +15,8 @@ export type Photo = {
   url: string;
   thumbUrl: string;
   date: string;
+  caption?: string;
+  status?: 'draft' | 'published';
   exif?: Exif;
 };
 
