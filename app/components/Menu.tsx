@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const EXTERNAL_LINKS = [
   { label: 'Instagram', href: 'https://instagram.com/chrisocphoto' },
@@ -11,6 +12,8 @@ const EXTERNAL_LINKS = [
 export default function Menu() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const onMap = pathname === '/map';
 
   // Close on click outside
   useEffect(() => {
@@ -55,17 +58,33 @@ export default function Menu() {
             <span className="text-white/80 text-sm font-semibold tracking-wide">ChrisOCPhoto</span>
           </div>
           <nav className="py-1.5">
-            <Link
-              href="/map"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
-                <path d="M1 3.5L5 2L9 4L13 2.5V11L9 12.5L5 10.5L1 12V3.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" fill="none"/>
-                <circle cx="5" cy="6" r="1.2" fill="currentColor"/>
-              </svg>
-              Map
-            </Link>
+            {onMap ? (
+              <Link
+                href="/"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
+                  <rect x="1" y="1" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+                  <rect x="7.5" y="1" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+                  <rect x="1" y="7.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+                  <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
+                </svg>
+                Grid
+              </Link>
+            ) : (
+              <Link
+                href="/map"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
+                  <path d="M1 3.5L5 2L9 4L13 2.5V11L9 12.5L5 10.5L1 12V3.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" fill="none"/>
+                  <circle cx="5" cy="6" r="1.2" fill="currentColor"/>
+                </svg>
+                Map
+              </Link>
+            )}
 
             <div className="h-px bg-white/8 mx-3 my-1" />
 

@@ -119,7 +119,8 @@ export default function MapView() {
         ref={mapRef}
         initialViewState={{ longitude: -98.35, latitude: 39.5, zoom: 4.5 }}
         style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh' }}
-        mapStyle="mapbox://styles/mapbox/dark-v11"
+        mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+        projection={{ name: 'globe' }}
         mapboxAccessToken={MAPBOX_TOKEN}
         interactiveLayerIds={['clusters', 'pins']}
         onClick={onClick}
