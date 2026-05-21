@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 
 let _client: S3Client | null = null;
 
@@ -30,4 +30,14 @@ export async function putObject(
     }),
   );
   return `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${key}`;
+}
+
+export async function deleteObjects(keys: string[]): Promise<void> {
+  if (!keys.length) return;
+  await client().send(
+    new DeleteObjectsCommand({
+      Bucket: process.env.CLOUDFLARE_R2_BUCKET!,
+      Delete: { Objects: keys.map((Key) => ({ Key })), Quiet: true },
+    }),
+  );
 }

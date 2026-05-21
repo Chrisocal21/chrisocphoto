@@ -80,27 +80,54 @@ const pinLayer: CircleLayer = {
 export default function MapView() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [hoveredLocation, setHoveredLocation] = useState<Location | null>(null);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [cursor, setCursor] = useState('grab');
   const mapRef = useRef<MapRef>(null);
 
   useEffect(() => {
-    fetch('/api/photos')
-      .then((r) => r.json())
-      .then((rows: PhotoRow[]) => setLocations(rowsToLocations(rows)))
-      .catch(console.error);
+    function load() {
+      fetch('/api/photos')
+        .then((r) => r.json())
+        .then((rows: PhotoRow[]) => setLocations(rowsToLocations(rows)))
+        .catch(console.error);
+    }
+    load();
+    const id = setInterval(load, 30_000);
+    return () => clearInterval(id);
   }, []);
 
   const geojson = useMemo(() => ({
     type: 'FeatureCollection' as const,
-    features: locations.map((loc) => ({
-      type: 'Feature' as const,
-      geometry: { type: 'Point' as const, coordinates: [loc.lng, loc.lat] },
-      properties: { id: loc.id, photoCount: loc.photos.length },
-    })),
+    features: locations
+      .filter((loc) => loc.lat != null && loc.lng != null)
+      .map((loc) => ({
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [loc.lng!, loc.lat!] },
+        properties: { id: loc.id, photoCount: loc.photos.length },
+      })),
   }), [locations]);
 
   const onMouseEnter = useCallback(() => setCursor('pointer'), []);
-  const onMouseLeave = useCallback(() => setCursor('grab'), []);
+  const onMouseLeave = useCallback(() => {
+    setCursor('grab');
+    setHoveredLocation(null);
+    setHoverPos(null);
+  }, []);
+
+  const onMouseMove = useCallback((e: MapMouseEvent) => {
+    const feature = e.features?.[0];
+    if (feature?.layer?.id === 'pins') {
+      const id = feature.properties?.id;
+      const loc = locations.find((l) => l.id === id);
+      if (loc) {
+        setHoveredLocation(loc);
+        setHoverPos({ x: e.point.x, y: e.point.y });
+      }
+    } else {
+      setHoveredLocation(null);
+    }
+  }, [locations]);
 
   const onClick = useCallback((e: MapMouseEvent) => {
     const features = e.features;
@@ -135,6 +162,7 @@ export default function MapView() {
         onClick={onClick}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
+        onMouseMove={onMouseMove}
         cursor={cursor}
         minZoom={2}
       >
@@ -159,6 +187,49 @@ export default function MapView() {
           location={selectedLocation}
           onClose={() => setSelectedLocation(null)}
         />
+      )}
+
+      {/* Hover popup */}
+      {hoveredLocation && hoverPos && !selectedLocation && (
+        <div
+          className="fixed z-40 pointer-events-none"
+          style={{
+            left: hoverPos.x,
+            top: hoverPos.y,
+            transform: hoverPos.x > window.innerWidth - 230
+              ? 'translate(-100%, -100%) translate(-12px, -12px)'
+              : 'translate(12px, -100%) translateY(-12px)',
+          }}
+        >
+          <div className="bg-black/85 backdrop-blur-md border border-white/12 rounded-xl overflow-hidden shadow-2xl w-52">
+            <div className="px-3 py-2.5 border-b border-white/8">
+              <p className="text-white/80 text-xs font-medium truncate">{hoveredLocation.name}</p>
+              <p className="text-white/30 text-xs mt-0.5">
+                {hoveredLocation.photos.length} photo{hoveredLocation.photos.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            <div
+              className={`grid gap-px bg-white/5 ${
+                hoveredLocation.photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+              }`}
+            >
+              {hoveredLocation.photos.slice(0, 4).map((photo) => (
+                <div
+                  key={photo.id}
+                  className="overflow-hidden bg-zinc-900"
+                  style={{ aspectRatio: '1' }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.thumbUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

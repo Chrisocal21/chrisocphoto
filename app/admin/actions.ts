@@ -2,8 +2,8 @@
 
 import sharp from 'sharp';
 import exifr from 'exifr';
-import { putObject } from '@/lib/r2';
-import { d1Run } from '@/lib/d1';
+import { putObject, deleteObjects } from '@/lib/r2';
+import { d1Run, d1Query } from '@/lib/d1';
 import { randomUUID } from 'crypto';
 import type { Exif } from '@/app/data/locations';
 
@@ -66,17 +66,16 @@ export async function uploadPhoto(formData: FormData): Promise<UploadResult> {
     raw = (await exifr.parse(buffer, { gps: true, exif: true, tiff: true })) ?? {};
   } catch { /* no EXIF */ }
 
-  const lat = typeof raw.latitude === 'number' ? raw.latitude : null;
-  const lng = typeof raw.longitude === 'number' ? raw.longitude : null;
-  if (!lat || !lng)
-    return { ok: false, error: 'No GPS data found in photo.' };
+  const lat: number | null = typeof raw.latitude === 'number' ? raw.latitude : null;
+  const lng: number | null = typeof raw.longitude === 'number' ? raw.longitude : null;
 
   const dateTaken =
     raw.DateTimeOriginal instanceof Date
       ? raw.DateTimeOriginal.toISOString()
       : new Date().toISOString();
 
-  const exifData = formatExif(raw, lat, lng, dateTaken);
+  const exifData =
+    lat != null && lng != null ? formatExif(raw, lat, lng, dateTaken) : null;
 
   // Resize with Sharp
   const id = randomUUID();
@@ -121,7 +120,7 @@ export async function uploadPhoto(formData: FormData): Promise<UploadResult> {
         lng,
         locationName,
         caption,
-        JSON.stringify(exifData),
+        exifData ? JSON.stringify(exifData) : null,
         dateTaken,
       ],
     );
@@ -131,4 +130,69 @@ export async function uploadPhoto(formData: FormData): Promise<UploadResult> {
   }
 
   return { ok: true, id, fullUrl, thumbUrl };
+}
+
+// ── Admin library actions ──────────────────────────────────────────────────
+
+export interface AdminPhotoRow {
+  id: string;
+  filename: string;
+  r2_url: string;
+  r2_thumb_url: string;
+  lat: number | null;
+  lng: number | null;
+  location_name: string | null;
+  caption: string | null;
+  status: string;
+  date_taken: string | null;
+}
+
+export async function getAdminPhotos(): Promise<AdminPhotoRow[]> {
+  return d1Query<AdminPhotoRow>(
+    `SELECT id, filename, r2_url, r2_thumb_url, lat, lng, location_name, caption, status, date_taken
+     FROM photos ORDER BY date_taken DESC`,
+  );
+}
+
+export async function setPhotoStatus(id: string, status: 'draft' | 'published'): Promise<void> {
+  await d1Run(`UPDATE photos SET status = ? WHERE id = ?`, [status, id]);
+}
+
+export async function setPhotoCaption(id: string, caption: string): Promise<void> {
+  await d1Run(`UPDATE photos SET caption = ? WHERE id = ?`, [caption || null, id]);
+}
+
+export async function setPhotoLocation(
+  id: string,
+  location: string,
+): Promise<{ lat: number | null; lng: number | null }> {
+  let lat: number | null = null;
+  let lng: number | null = null;
+
+  if (location.trim()) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
+      const res = await fetch(url, { headers: { 'User-Agent': 'chrisocphoto/1.0' } });
+      if (res.ok) {
+        const data = await res.json() as Array<{ lat: string; lon: string }>;
+        if (data.length > 0) {
+          lat = parseFloat(data[0].lat);
+          lng = parseFloat(data[0].lon);
+        }
+      }
+    } catch { /* geocoding failed — coords stay null */ }
+  }
+
+  await d1Run(
+    `UPDATE photos SET location_name = ?, lat = ?, lng = ? WHERE id = ?`,
+    [location || null, lat, lng, id],
+  );
+  return { lat, lng };
+}
+
+export async function deletePhoto(id: string): Promise<void> {
+  await Promise.all([
+    d1Run(`DELETE FROM photos WHERE id = ?`, [id]),
+    deleteObjects([`photos/${id}/full.jpg`, `photos/${id}/thumb.jpg`]).catch(() => {}),
+  ]);
 }

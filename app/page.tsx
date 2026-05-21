@@ -18,10 +18,15 @@ export default function Home() {
   const isDragging = useRef(false);
 
   useEffect(() => {
-    fetch('/api/photos')
-      .then((r) => r.json())
-      .then((rows: PhotoRow[]) => setLocations(rowsToLocations(rows)))
-      .catch(console.error);
+    function load() {
+      fetch('/api/photos')
+        .then((r) => r.json())
+        .then((rows: PhotoRow[]) => setLocations(rowsToLocations(rows)))
+        .catch(console.error);
+    }
+    load();
+    const id = setInterval(load, 30_000);
+    return () => clearInterval(id);
   }, []);
 
   const allPhotos = useMemo(

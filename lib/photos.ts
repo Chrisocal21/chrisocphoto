@@ -4,8 +4,8 @@ export interface PhotoRow {
   id: string;
   r2_url: string;
   r2_thumb_url: string;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   location_name: string | null;
   caption: string | null;
   exif_json: string | null;
@@ -21,8 +21,8 @@ export function rowsToLocations(rows: PhotoRow[]): Location[] {
       map.set(name, {
         id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
         name,
-        lat: row.lat,
-        lng: row.lng,
+        lat: row.lat ?? undefined,
+        lng: row.lng ?? undefined,
         photos: [],
       });
     }

@@ -14,6 +14,7 @@ export default function Menu() {
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const onMap = pathname === '/map';
+  const onAdmin = pathname === '/admin';
 
   // Close on click outside
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function Menu() {
             <span className="text-white/80 text-sm font-semibold tracking-wide">ChrisOCPhoto</span>
           </div>
           <nav className="py-1.5">
-            {onMap ? (
+            {(onMap || onAdmin) && (
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
@@ -72,7 +73,8 @@ export default function Menu() {
                 </svg>
                 Grid
               </Link>
-            ) : (
+            )}
+            {(!onMap) && (
               <Link
                 href="/map"
                 onClick={() => setOpen(false)}

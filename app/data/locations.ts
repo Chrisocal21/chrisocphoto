@@ -23,8 +23,8 @@ export type Photo = {
 export type Location = {
   id: string;
   name: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   photos: Photo[];
 };
 
