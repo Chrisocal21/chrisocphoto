@@ -104,13 +104,15 @@ export default function Home() {
       {currentPage > 0 && (
         <button
           onClick={() => goToPage(currentPage - 1)}
-          className="fixed left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center text-3xl text-white/30 hover:text-white/70 transition-colors"
+          className="fixed left-3 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-5xl text-white/70 hover:text-white transition-colors"
+          style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
         >‹</button>
       )}
       {currentPage < pages.length - 1 && (
         <button
           onClick={() => goToPage(currentPage + 1)}
-          className="fixed right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center text-3xl text-white/30 hover:text-white/70 transition-colors"
+          className="fixed right-3 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center text-5xl text-white/70 hover:text-white transition-colors"
+          style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}
         >›</button>
       )}
 
