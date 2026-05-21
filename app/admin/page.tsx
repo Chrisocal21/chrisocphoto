@@ -1,12 +1,24 @@
 'use client';
 
 import { useState, useEffect, useRef, useTransition } from 'react';
+import exifr from 'exifr';
 import { uploadPhoto, getAdminPhotos, setPhotoStatus, setPhotoCaption, setPhotoLocation, deletePhoto } from './actions';
 import type { UploadResult, AdminPhotoRow } from './actions';
 import Menu from '../components/Menu';
 
 // ── Upload queue types ────────────────────────────────────────────────────────
 type QueueStatus = 'pending' | 'uploading' | 'done' | 'error';
+interface ClientExif {
+  lat: number | null;
+  lng: number | null;
+  dateTaken: string | null;
+  make: string | null;
+  model: string | null;
+  aperture: number | null;
+  shutter: number | null;
+  iso: number | null;
+  focalLength: number | null;
+}
 interface QueuedFile {
   id: string;
   file: File;
@@ -15,6 +27,7 @@ interface QueuedFile {
   caption: string;
   status: QueueStatus;
   error?: string;
+  exif?: ClientExif;
 }
 
 export default function AdminPage() {
@@ -23,6 +36,19 @@ export default function AdminPage() {
   const [loadingLibrary, setLoadingLibrary] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!previewId) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setPreviewId(null); return; }
+      const idx = dbPhotos.findIndex((p) => p.id === previewId);
+      if (e.key === 'ArrowRight' && idx < dbPhotos.length - 1) setPreviewId(dbPhotos[idx + 1].id);
+      if (e.key === 'ArrowLeft' && idx > 0) setPreviewId(dbPhotos[idx - 1].id);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [previewId, dbPhotos]);
 
   useEffect(() => {
     if (tab === 'library') {
@@ -77,6 +103,21 @@ export default function AdminPage() {
     const added: QueuedFile[] = [];
     for (const file of Array.from(files)) {
       const previewUrl = URL.createObjectURL(file);
+      let exif: ClientExif = { lat: null, lng: null, dateTaken: null, make: null, model: null, aperture: null, shutter: null, iso: null, focalLength: null };
+      try {
+        const raw = (await exifr.parse(file, { gps: true, exif: true, tiff: true })) ?? {};
+        exif = {
+          lat: typeof raw.latitude === 'number' ? raw.latitude : null,
+          lng: typeof raw.longitude === 'number' ? raw.longitude : null,
+          dateTaken: raw.DateTimeOriginal instanceof Date ? raw.DateTimeOriginal.toISOString() : null,
+          make: typeof raw.Make === 'string' ? raw.Make.trim() : null,
+          model: typeof raw.Model === 'string' ? raw.Model.trim() : null,
+          aperture: typeof raw.FNumber === 'number' ? raw.FNumber : null,
+          shutter: typeof raw.ExposureTime === 'number' ? raw.ExposureTime : null,
+          iso: typeof raw.ISO === 'number' ? raw.ISO : null,
+          focalLength: typeof raw.FocalLength === 'number' ? raw.FocalLength : null,
+        };
+      } catch { /* no EXIF */ }
       added.push({
         id: Math.random().toString(36).slice(2),
         file,
@@ -84,6 +125,7 @@ export default function AdminPage() {
         locationName: '',
         caption: '',
         status: 'pending',
+        exif,
       });
     }
     setQueue((q) => [...q, ...added]);
@@ -109,6 +151,7 @@ export default function AdminPage() {
           fd.append('file', compressed);
           if (item.locationName) fd.append('location_name', item.locationName);
           if (item.caption) fd.append('caption', item.caption);
+          if (item.exif) fd.append('client_exif', JSON.stringify(item.exif));
           const result: UploadResult = await uploadPhoto(fd);
           setQueue((q) =>
             q.map((f) =>
@@ -281,7 +324,7 @@ export default function AdminPage() {
             {!loadingLibrary && (() => {
               const groups = new Map<string, AdminPhotoRow[]>();
               for (const p of dbPhotos) {
-                const key = p.location_name ?? 'Unknown';
+                const key = (p.location_name ?? 'Unknown').trim();
                 if (!groups.has(key)) groups.set(key, []);
                 groups.get(key)!.push(p);
               }
@@ -329,6 +372,17 @@ export default function AdminPage() {
                               }`}
                             >
                               {isLive ? 'live' : 'draft'}
+                            </button>
+                            {/* Preview */}
+                            <button
+                              onClick={() => setPreviewId(photo.id)}
+                              className="text-white/15 hover:text-white/45 transition-colors flex-shrink-0 p-1"
+                              title="Preview"
+                            >
+                              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                <path d="M1 6.5C1 6.5 3 2.5 6.5 2.5S12 6.5 12 6.5 10 10.5 6.5 10.5 1 6.5 1 6.5z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <circle cx="6.5" cy="6.5" r="1.5" stroke="currentColor" strokeWidth="1.2"/>
+                              </svg>
                             </button>
                             {/* Pencil */}
                             <button
@@ -414,6 +468,93 @@ export default function AdminPage() {
         )}
 
       </div>
+
+      {/* ── Lightbox ── */}
+      {previewId && (() => {
+        const idx = dbPhotos.findIndex((p) => p.id === previewId);
+        const photo = dbPhotos[idx];
+        if (!photo) return null;
+        const hasPrev = idx > 0;
+        const hasNext = idx < dbPhotos.length - 1;
+        const isLive = photo.status === 'published';
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-black/92 backdrop-blur-sm flex flex-col"
+            onClick={() => setPreviewId(null)}
+          >
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/8" onClick={(e) => e.stopPropagation()}>
+              <span className="text-white/30 text-xs truncate max-w-xs">{photo.filename}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-white/20 text-xs">{idx + 1} / {dbPhotos.length}</span>
+                <button
+                  onClick={async () => {
+                    const next = isLive ? 'draft' : 'published';
+                    await setPhotoStatus(photo.id, next);
+                    setDbPhotos((prev) => prev.map((p) => p.id === photo.id ? { ...p, status: next } : p));
+                  }}
+                  className={`text-xs px-2 py-0.5 rounded border transition-colors ${
+                    isLive ? 'text-white/40 border-white/15 hover:border-white/30' : 'text-white/20 border-white/8 hover:border-white/20'
+                  }`}
+                >
+                  {isLive ? 'live' : 'draft'}
+                </button>
+                <button onClick={() => setPreviewId(null)} className="text-white/30 hover:text-white/70 text-2xl leading-none transition-colors">×</button>
+              </div>
+            </div>
+
+            {/* Image + nav arrows */}
+            <div className="flex-1 relative flex items-center justify-center min-h-0 px-14" onClick={(e) => e.stopPropagation()}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo.r2_url} alt="" className="max-w-full max-h-full object-contain" style={{ maxHeight: 'calc(100vh - 180px)' }} />
+              {hasPrev && (
+                <button
+                  onClick={() => setPreviewId(dbPhotos[idx - 1].id)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/80 text-white/50 hover:text-white/90 text-xl transition-colors"
+                >‹</button>
+              )}
+              {hasNext && (
+                <button
+                  onClick={() => setPreviewId(dbPhotos[idx + 1].id)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/80 text-white/50 hover:text-white/90 text-xl transition-colors"
+                >›</button>
+              )}
+            </div>
+
+            {/* Edit bar */}
+            <div className="flex-shrink-0 border-t border-white/8 px-4 py-3" onClick={(e) => e.stopPropagation()}>
+              <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-4">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-white/20 text-xs w-14 flex-shrink-0">Location</span>
+                  <input
+                    key={photo.id + '-loc'}
+                    defaultValue={photo.location_name ?? ''}
+                    onBlur={async (e) => {
+                      const { lat, lng } = await setPhotoLocation(photo.id, e.target.value);
+                      setDbPhotos((prev) => prev.map((p) => p.id === photo.id ? { ...p, location_name: e.target.value || null, lat, lng } : p));
+                    }}
+                    placeholder="Enter location…"
+                    className="flex-1 bg-transparent text-white/60 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-white/15 transition-colors pb-0.5"
+                  />
+                  {photo.lat != null && (
+                    <span className="text-white/30 text-xs flex-shrink-0" title={`${photo.lat?.toFixed(4)}, ${photo.lng?.toFixed(4)}`}>📍</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-white/20 text-xs w-14 flex-shrink-0">Caption</span>
+                  <input
+                    key={photo.id + '-cap'}
+                    defaultValue={photo.caption ?? ''}
+                    onBlur={(e) => setPhotoCaption(photo.id, e.target.value)}
+                    placeholder="Add caption…"
+                    className="flex-1 bg-transparent text-white/60 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-white/15 transition-colors pb-0.5"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

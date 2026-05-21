@@ -16,7 +16,7 @@ export function rowsToLocations(rows: PhotoRow[]): Location[] {
   const map = new Map<string, Location>();
 
   for (const row of rows) {
-    const name = row.location_name ?? 'Unknown';
+    const name = (row.location_name ?? 'Unknown').trim();
     if (!map.has(name)) {
       map.set(name, {
         id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),

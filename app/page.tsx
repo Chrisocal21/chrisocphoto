@@ -44,7 +44,7 @@ export default function Home() {
     const clamped = Math.max(0, Math.min(page, pages.length - 1));
     setCurrentPage(clamped);
     scrollRef.current?.scrollTo({ left: clamped * window.innerWidth, behavior: 'smooth' });
-  }, []);
+  }, [pages]);
 
   // Arrow key navigation
   useEffect(() => {

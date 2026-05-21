@@ -60,22 +60,42 @@ export async function uploadPhoto(formData: FormData): Promise<UploadResult> {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  // Parse EXIF
+  // client_exif is extracted from the original file before canvas compression strips EXIF
+  type ClientExif = { lat?: number | null; lng?: number | null; dateTaken?: string | null; make?: string | null; model?: string | null; aperture?: number | null; shutter?: number | null; iso?: number | null; focalLength?: number | null };
+  let clientExif: ClientExif | null = null;
+  const clientExifStr = formData.get('client_exif');
+  if (typeof clientExifStr === 'string') {
+    try { clientExif = JSON.parse(clientExifStr); } catch { /* malformed */ }
+  }
+
+  // Parse EXIF from buffer as fallback (canvas-compressed files have no EXIF)
   let raw: Record<string, unknown> = {};
   try {
     raw = (await exifr.parse(buffer, { gps: true, exif: true, tiff: true })) ?? {};
   } catch { /* no EXIF */ }
 
-  const lat: number | null = typeof raw.latitude === 'number' ? raw.latitude : null;
-  const lng: number | null = typeof raw.longitude === 'number' ? raw.longitude : null;
+  const lat: number | null =
+    clientExif?.lat != null ? clientExif.lat :
+    typeof raw.latitude === 'number' ? raw.latitude : null;
+  const lng: number | null =
+    clientExif?.lng != null ? clientExif.lng :
+    typeof raw.longitude === 'number' ? raw.longitude : null;
 
   const dateTaken =
-    raw.DateTimeOriginal instanceof Date
-      ? raw.DateTimeOriginal.toISOString()
-      : new Date().toISOString();
+    clientExif?.dateTaken ??
+    (raw.DateTimeOriginal instanceof Date ? raw.DateTimeOriginal.toISOString() : new Date().toISOString());
+
+  const exifRaw: Record<string, unknown> = clientExif ? {
+    FNumber: clientExif.aperture,
+    ExposureTime: clientExif.shutter,
+    Make: clientExif.make,
+    Model: clientExif.model,
+    ISO: clientExif.iso,
+    FocalLength: clientExif.focalLength,
+  } : raw;
 
   const exifData =
-    lat != null && lng != null ? formatExif(raw, lat, lng, dateTaken) : null;
+    lat != null && lng != null ? formatExif(exifRaw, lat, lng, dateTaken) : null;
 
   // Resize with Sharp
   const id = randomUUID();

@@ -118,7 +118,7 @@ export default function PhotoViewer({ location, onClose }: Props) {
 
       {/* Photo */}
       <div
-        className="flex-1 flex items-center justify-center px-16 py-16"
+        className="flex-1 flex items-center justify-center overflow-hidden px-4 py-4 sm:px-16 sm:py-8"
         onClick={(e) => e.stopPropagation()}
       >
         {!loaded && (
@@ -131,7 +131,8 @@ export default function PhotoViewer({ location, onClose }: Props) {
           src={photo.url}
           alt={location.name}
           onLoad={() => setLoaded(true)}
-          className={`max-w-full max-h-full object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`max-w-full object-contain transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          style={{ maxHeight: 'calc(100svh - 8rem)' }}
         />
       </div>
 
