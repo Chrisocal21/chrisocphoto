@@ -82,12 +82,14 @@ export async function uploadPhoto(formData: FormData): Promise<UploadResult> {
   let fullBuf: Buffer;
   let thumbBuf: Buffer;
   try {
-    // .rotate() with no args auto-rotates based on EXIF orientation tag,
-    // then strips the orientation metadata so viewers don't double-rotate.
-    // We decode to a raw pipeline first so HEIC/HEIF clones work reliably.
-    const pipeline = sharp(buffer).rotate();
-    const raw = await pipeline.toBuffer({ resolveWithObject: true });
-    const img = sharp(raw.data, { raw: raw.info });
+    // Decode to raw pixels first — handles HEIC/HEIF and any input format.
+    // .rotate() with no args reads the EXIF Orientation tag and corrects it,
+    // stripping the tag so viewers don't double-rotate.
+    const { data, info } = await sharp(buffer)
+      .rotate()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const img = sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } });
     [fullBuf, thumbBuf] = await Promise.all([
       img.clone().jpeg({ quality: 85 }).toBuffer(),
       img.clone().resize({ width: 800 }).jpeg({ quality: 80 }).toBuffer(),

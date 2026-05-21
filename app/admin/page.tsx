@@ -42,12 +42,41 @@ export default function AdminPage() {
   const dragOver = useRef(false);
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // Compress + auto-orient a file client-side before upload.
+  // Reduces large HEIC/JPEG mobile photos from ~12 MB down to ~1-3 MB,
+  // and bakes in EXIF orientation so the server doesn't need to guess.
+  async function compressFile(file: File): Promise<File> {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const MAX = 2048;
+      let { width, height } = bitmap;
+      if (width > MAX || height > MAX) {
+        if (width >= height) { height = Math.round(height * MAX / width); width = MAX; }
+        else { width = Math.round(width * MAX / height); height = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d')!.drawImage(bitmap, 0, 0, width, height);
+      bitmap.close();
+      return await new Promise<File>((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => blob
+            ? resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }))
+            : reject(new Error('toBlob failed')),
+          'image/jpeg', 0.85,
+        );
+      });
+    } catch {
+      return file; // fallback: send original
+    }
+  }
+
   async function addFiles(files: FileList | null) {
     if (!files) return;
     const added: QueuedFile[] = [];
     for (const file of Array.from(files)) {
       const previewUrl = URL.createObjectURL(file);
-      // Quick GPS check client-side
       added.push({
         id: Math.random().toString(36).slice(2),
         file,
@@ -74,20 +103,31 @@ export default function AdminPage() {
     startTransition(async () => {
       for (const item of pending) {
         setQueue((q) => q.map((f) => (f.id === item.id ? { ...f, status: 'uploading' } : f)));
-        const fd = new FormData();
-        fd.append('file', item.file);
-        if (item.locationName) fd.append('location_name', item.locationName);
-        if (item.caption) fd.append('caption', item.caption);
-        const result: UploadResult = await uploadPhoto(fd);
-        setQueue((q) =>
-          q.map((f) =>
-            f.id === item.id
-              ? result.ok
-                ? { ...f, status: 'done' }
-                : { ...f, status: 'error', error: result.error }
-              : f,
-          ),
-        );
+        try {
+          const compressed = await compressFile(item.file);
+          const fd = new FormData();
+          fd.append('file', compressed);
+          if (item.locationName) fd.append('location_name', item.locationName);
+          if (item.caption) fd.append('caption', item.caption);
+          const result: UploadResult = await uploadPhoto(fd);
+          setQueue((q) =>
+            q.map((f) =>
+              f.id === item.id
+                ? result.ok
+                  ? { ...f, status: 'done' }
+                  : { ...f, status: 'error', error: result.error }
+                : f,
+            ),
+          );
+        } catch (err) {
+          setQueue((q) =>
+            q.map((f) =>
+              f.id === item.id
+                ? { ...f, status: 'error', error: err instanceof Error ? err.message : 'Upload failed' }
+                : f,
+            ),
+          );
+        }
       }
     });
   }
