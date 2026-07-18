@@ -60,7 +60,7 @@ const pinGlowLayer: CircleLayer = {
   filter: ['!', ['has', 'point_count']],
   paint: {
     'circle-color': 'rgba(255,255,255,0.18)',
-    'circle-radius': ['interpolate', ['linear'], ['get', 'photoCount'], 1, 10, 10, 16],
+    'circle-radius': ['interpolate', ['linear'], ['get', 'photoCount'], 1, 20, 10, 30],
     'circle-blur': 0.9,
   },
 };
@@ -73,7 +73,7 @@ const pinLayer: CircleLayer = {
   filter: ['!', ['has', 'point_count']],
   paint: {
     'circle-color': 'rgba(255,255,255,0.92)',
-    'circle-radius': ['interpolate', ['linear'], ['get', 'photoCount'], 1, 4, 5, 6, 10, 8],
+    'circle-radius': ['interpolate', ['linear'], ['get', 'photoCount'], 1, 10, 5, 14, 10, 18],
   },
 };
 

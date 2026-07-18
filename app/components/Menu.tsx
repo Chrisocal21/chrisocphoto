@@ -55,8 +55,9 @@ export default function Menu() {
       {open && (
         <div className="absolute top-11 right-0 w-48 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden shadow-xl">
           {/* Logo */}
-          <div className="px-4 pt-3.5 pb-2.5 border-b border-white/8">
-            <span className="text-white/80 text-sm font-semibold tracking-wide">ChrisOCPhoto</span>
+          <div className="px-3 pt-3 pb-2 border-b border-white/8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/Logo-Vertical.png" alt="ChrisOCPhoto" className="w-full" style={{ mixBlendMode: 'screen', filter: 'brightness(1.1) contrast(1.05)' }} />
           </div>
           <nav className="py-1.5">
             {(onMap || onAdmin) && (
@@ -87,6 +88,19 @@ export default function Menu() {
                 Map
               </Link>
             )}
+
+            <Link
+              href="/about"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
+                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/>
+                <circle cx="7" cy="4.5" r="0.8" fill="currentColor"/>
+                <path d="M7 6.5v4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+              About
+            </Link>
 
             <div className="h-px bg-white/8 mx-3 my-1" />
 
