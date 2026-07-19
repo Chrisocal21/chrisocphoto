@@ -33,14 +33,14 @@ export default function PhotoViewer({ location, onClose }: Props) {
   const goNext = useCallback(() => {
     setLoaded(false);
     setShowInfo(false);
-    setCurrentIndex((i) => Math.min(i + 1, location.photos.length - 1));
+    setCurrentIndex((i) => (i + 1) % location.photos.length);
   }, [location.photos.length]);
 
   const goPrev = useCallback(() => {
     setLoaded(false);
     setShowInfo(false);
-    setCurrentIndex((i) => Math.max(i - 1, 0));
-  }, []);
+    setCurrentIndex((i) => (i - 1 + location.photos.length) % location.photos.length);
+  }, [location.photos.length]);
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -136,37 +136,21 @@ export default function PhotoViewer({ location, onClose }: Props) {
         />
       </div>
 
-      {/* Prev / Next arrows */}
+      {/* Dot indicators */}
       {location.photos.length > 1 && (
-        <>
-          <button
-            onClick={(e) => { e.stopPropagation(); goPrev(); }}
-            disabled={currentIndex === 0}
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-3xl text-white/30 hover:text-white/80 disabled:opacity-0 transition-colors"
-            aria-label="Previous photo"
-          >‹</button>
-          <button
-            onClick={(e) => { e.stopPropagation(); goNext(); }}
-            disabled={currentIndex === location.photos.length - 1}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-3xl text-white/30 hover:text-white/80 disabled:opacity-0 transition-colors"
-            aria-label="Next photo"
-          >›</button>
-
-          {/* Dot indicators */}
-          <div
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {location.photos.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setLoaded(false); setShowInfo(false); setCurrentIndex(i); }}
-                className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentIndex ? 'bg-white' : 'bg-white/25'}`}
-                aria-label={`Photo ${i + 1}`}
-              />
-            ))}
-          </div>
-        </>
+        <div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {location.photos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { setLoaded(false); setShowInfo(false); setCurrentIndex(i); }}
+              className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentIndex ? 'bg-white' : 'bg-white/25'}`}
+              aria-label={`Photo ${i + 1}`}
+            />
+          ))}
+        </div>
       )}
 
       {/* Info panel */}
