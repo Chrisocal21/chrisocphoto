@@ -102,6 +102,18 @@ export default function Menu() {
               About
             </Link>
 
+            <Link
+              href="/contact"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
+                <path d="M2 3h10c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1z" stroke="currentColor" strokeWidth="1.2" fill="none"/>
+                <path d="M1 4l6 4 6-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
+              Contact
+            </Link>
+
             <div className="h-px bg-white/8 mx-3 my-1" />
 
             {EXTERNAL_LINKS.map((link) => (
