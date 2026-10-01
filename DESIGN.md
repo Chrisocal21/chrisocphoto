@@ -66,6 +66,8 @@ It writes the header logo (`public/brand/`), the app icons (`public/icons/`), th
 
 - **Photos are in the page before any JavaScript runs.** Pages are built ahead of time from the database and refreshed every 60 seconds (`lib/photo-store.ts`). Once loaded, the page asks `/api/photos` for anything newer, so a new upload still appears on open tabs within 30 seconds.
 - **The grid loads in three steps:** the top row, then the rest of the first screen, then one page ahead of the visitor. Loading all of it at once is slower where it matters, on a phone.
+- **The grid photos fade in, and the fade earns its place.** It looks like a nicety you could drop for speed. Dropping it was tried and measured: nothing appeared sooner, and the phone score fell from about 88 to about 78, because the browser then times a second-row photo instead of a top-row one. The note is on the `tile-in` animation in `tailwind.config.ts`.
+- **The thumbnails on the About page wait until you scroll near them** (`app/components/LatestFrames.tsx`). They sit about three screens down on a phone, and the browser's own lazy loading fetched all six anyway.
 - **The open photo lives in the address** as `?photo=<id>` (`lib/use-photo-param.ts`). That is what makes Back close the viewer and what makes a single photo shareable.
 - **Opening a photo grows it out of its place in the grid.** That is a view transition (`lib/view-transition.ts`, plus the rules at the bottom of `app/globals.css`). Browsers without it just swap screens.
 - **The map token only works from approved addresses.** `localhost:3000` is one of them, so the map will not load from another port.
@@ -95,14 +97,18 @@ These lines were written in his voice on October 1, 2026 and are drafts until he
 
 ## Checked on October 1, 2026
 
-Measured with Lighthouse against a production build served on this machine. The "before" column is the previous commit built and measured the same way, so the two are comparable. The hosted site will score differently.
+Measured with Lighthouse on a simulated phone, against the live site before this pass went out and again after.
 
-| Page, on a phone | Performance before | after | Accessibility before | after |
+| Page | Performance before | after | Accessibility before | after |
 | :--- | :--- | :--- | :--- | :--- |
-| Grid | 81 | 86 to 89 | 100 | 100 |
-| About | 83 | 97 to 98 | 95 | 100 |
-| Contact | 83 | 96 to 97 | 100 | 100 |
+| Grid | 84 | 87 | 100 | 100 |
+| About | 93 | 99 | 95 | 100 |
+| Contact | 86 | 99 | 100 | 100 |
 
-The ranges are two runs; Lighthouse varies a few points between them. Best practices and SEO are 100 on all three, before and after. On a desktop all three score 96 to 100 for performance.
+Best practices and SEO are 100 on all three, before and after. On a desktop every page scores 96 to 100.
 
-What is left on the grid is the thumbnails themselves. They are 800px wide, and a tile on a phone is about 130px wide. Serving them at the size they are shown is the one change that would move that number much further, and it is a storage decision, not a styling one.
+Lighthouse moves a few points between runs, and by more on a page's first visit after a deploy. The grid varies the most: six runs of a production build on this machine gave a median of 88 and a range of 86 to 96.
+
+The number that matters more than the score: on a normal connection the first photo used to appear after about a second and a half, because the page had to load, then ask for the list of photos, then fetch them. It now appears in about a quarter of a second, because the photos are already in the page.
+
+What is left on the grid is the thumbnails themselves. They are 800px wide, and a tile on a phone is about 130px wide. Serving them at the size they are shown is the one change that would move that score much further, and it is a storage decision, not a styling one.

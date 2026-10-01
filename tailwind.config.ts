@@ -28,6 +28,9 @@ const config: Config = {
         rise: {
           from: { opacity: "0", transform: "translateY(14px)" },
         },
+        // Keep the fade. Without it the browser's "largest paint" measure moves off the top row
+        // and onto a second-row photo, which loads in the second wave: measured in October 2026,
+        // that dropped the phone score from about 88 to about 78 with nothing appearing sooner.
         "tile-in": {
           from: { opacity: "0", transform: "scale(1.05)" },
         },

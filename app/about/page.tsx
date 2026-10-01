@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
+import LatestFrames from '../components/LatestFrames';
 import { IconArrowRight, IconArrowUpRight } from '../components/icons';
 import { getInitialPhotos } from '@/lib/photo-store';
 import { pageMetadata, site } from '@/lib/site';
@@ -21,7 +22,11 @@ const ELSEWHERE = [
 export default async function AboutPage() {
   const rows = (await getInitialPhotos()) ?? [];
   const places = new Set(rows.map((row) => row.location_name?.trim()).filter(Boolean));
-  const latest = rows.slice(0, 6);
+  const latest = rows.slice(0, 6).map((row) => ({
+    id: row.id,
+    thumbUrl: row.r2_thumb_url,
+    place: row.location_name?.trim() || null,
+  }));
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -126,26 +131,7 @@ export default async function AboutPage() {
                 See all {rows.length}
               </Link>
             </div>
-            <ul className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3">
-              {latest.map((row) => (
-                <li key={row.id}>
-                  <Link
-                    href={`/?photo=${row.id}`}
-                    aria-label={`Open photo${row.location_name ? `: ${row.location_name.trim()}` : ''}`}
-                    className="group block aspect-square overflow-hidden rounded-lg bg-neutral-900"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={row.r2_thumb_url}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-cover transition-transform duration-700 ease-swift group-hover:scale-105"
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <LatestFrames frames={latest} />
           </section>
         )}
       </main>
