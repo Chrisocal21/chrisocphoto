@@ -20,6 +20,7 @@ A public-facing photo journal. Visitors land on a fullscreen 3×3 photo grid —
 | EXIF parsing | exifr (npm) | Lightweight, reads GPS from iPhone photos |
 | Image processing | Sharp | Resize/optimize on upload |
 | Styling | Tailwind CSS | Consistent with stack |
+| Type | Sora (headings) + Inter (text), via `next/font` | Self-hosted at build time. See [DESIGN.md](DESIGN.md) |
 
 ---
 
@@ -46,6 +47,7 @@ A public-facing photo journal. Visitors land on a fullscreen 3×3 photo grid —
 - Swipe/drag left-right or use arrow keys to page through
 - Tap any photo → fullscreen viewer with EXIF overlay (toggle with `i`)
 - Arrow keys + swipe to navigate photos in viewer; swipe down or ESC to close
+- The open photo is in the address as `?photo=<id>`, so one photo can be shared and the browser's Back button closes the viewer
 - Menu (top-right) → Map view for location-based browsing
 
 ---
@@ -81,14 +83,16 @@ CREATE TABLE photos (
 | `/admin` | Password-protected interface — **Upload** tab (drag-and-drop) + **Library** tab (edit all photos) |
 | `/admin/upload` | Drag-and-drop photo uploader |
 | `/api/photos` | GET all photo metadata for map + grid rendering |
+| `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` | Generated from `app/robots.ts`, `app/sitemap.ts`, `app/manifest.ts` |
 | `/api/upload` | POST — handles upload to R2, writes to D1 |
 
 ---
 
 ## Map Configuration
 
-- Base style: Mapbox `dark-v11` or `navigation-night-v1`
-- Start position: Centered on US, zoom level 4 (shows travel spread)
+- Base style: Mapbox `dark-v11` (was `navigation-night-v1` until October 2026; it is one constant, `MAP_STYLE` in `app/components/MapView.tsx`)
+- Start position: frames every pin on load, whatever the screen size
+- The count at the bottom ("8 places · 24 photos") opens a searchable list of every place
 - Pins: Custom SVG dot, white fill, subtle glow
 - Clustering: Enabled, clusters collapse below zoom 10
 - Cluster color: White, scales with count
@@ -101,9 +105,10 @@ CREATE TABLE photos (
 - Opens as a fullscreen overlay on top of the map
 - Black background
 - Photo centered, aspect ratio preserved
-- Minimal UI: location name top-left, date top-right, close button top-right
+- Minimal UI: location name and date top-left, details and close buttons top-right
 - If multiple photos at location: dot indicators bottom-center, swipe to navigate
-- No captions, no titles, no EXIF data shown to public
+- The caption, if the photo has one, sits directly under it
+- EXIF details are behind the info button (or `i`)
 - Keyboard: ESC closes, arrow keys navigate
 
 ---
@@ -313,7 +318,9 @@ CREATE INDEX idx_photos_status ON photos(status);
 ## Design Principles
 
 - Dark everything — map, viewer, admin
-- No logo, no nav bar, no footer on the public site
+- No nav bar. The logo and the menu float over the grid and the map as two small capsules; nothing else sits on top of the photos
+- A one-line footer on the About and Contact pages only
+- How it all looks, and why: [DESIGN.md](DESIGN.md)
 - The map loads edge-to-edge, full viewport
 - Photography is the only content
 - Mobile-first — the experience on a phone should feel native

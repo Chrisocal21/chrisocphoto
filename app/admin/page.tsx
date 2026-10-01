@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useTransition } from 'react';
 import exifr from 'exifr';
 import { uploadPhoto, getAdminPhotos, setPhotoStatus, setPhotoCaption, setPhotoLocation, deletePhoto } from './actions';
 import type { UploadResult, AdminPhotoRow } from './actions';
-import Menu from '../components/Menu';
+import SiteHeader from '../components/SiteHeader';
+import { IconPin } from '../components/icons';
 
 // ── Upload queue types ────────────────────────────────────────────────────────
 type QueueStatus = 'pending' | 'uploading' | 'done' | 'error';
@@ -178,26 +179,23 @@ export default function AdminPage() {
   const pendingCount = queue.filter((f) => f.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <Menu />
+    <div className="min-h-screen bg-black text-white">
+      <SiteHeader />
       <div className="max-w-2xl mx-auto px-6 py-12">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <span className="text-white/40 text-xs tracking-widest uppercase">chrisocphoto</span>
-          <span className="text-white/20 text-xs">admin</span>
-        </div>
+        <h1 className="eyebrow mb-8 font-sans">Admin</h1>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-8 border-b border-white/8">
+        <div className="flex gap-1 mb-8 border-b border-white/10">
           {(['upload', 'library'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`px-4 py-2 text-xs tracking-widest uppercase -mb-px border-b transition-colors ${
                 tab === t
-                  ? 'text-white/80 border-white/40'
-                  : 'text-white/25 border-transparent hover:text-white/50'
+                  ? 'text-white border-white/40'
+                  : 'text-neutral-400 border-transparent hover:text-neutral-200'
               }`}
             >
               {t === 'library' ? `library (${totalPhotos})` : t}
@@ -224,18 +222,18 @@ export default function AdminPage() {
               onDragOver={(e) => { e.preventDefault(); if (!dragOver.current) { dragOver.current = true; setIsDragOver(true); } }}
               onDragLeave={() => { dragOver.current = false; setIsDragOver(false); }}
               onDrop={(e) => { e.preventDefault(); dragOver.current = false; setIsDragOver(false); addFiles(e.dataTransfer.files); }}
-              className={`border border-dashed rounded-lg px-8 py-16 text-center mb-6 cursor-pointer transition-colors ${isDragOver ? 'border-white/30 bg-white/3' : 'border-white/10 hover:border-white/20'}`}
+              className={`border border-dashed rounded-lg px-8 py-16 text-center mb-6 cursor-pointer transition-colors ${isDragOver ? 'border-white/30 bg-white/[0.03]' : 'border-white/10 hover:border-white/20'}`}
             >
-              <div className="text-white/15 text-6xl mb-4 select-none">+</div>
-              <p className="text-white/40 text-sm mb-2">Drop photos here or click to select</p>
-              <p className="text-white/20 text-xs">JPEG · HEIC · PNG · GPS extracted automatically</p>
+              <div className="text-neutral-500 text-6xl mb-4 select-none">+</div>
+              <p className="text-neutral-300 text-sm mb-2">Drop photos here or click to select</p>
+              <p className="text-neutral-500 text-xs">JPEG · HEIC · PNG · GPS extracted automatically</p>
             </div>
 
             {/* Queue */}
             {queue.length > 0 && (
               <div className="space-y-1 mb-6">
                 {queue.map((item) => (
-                  <div key={item.id} className="border border-white/8 rounded-lg overflow-hidden">
+                  <div key={item.id} className="border border-white/10 rounded-lg overflow-hidden">
                     <div className="flex items-center gap-3 px-4 py-3">
                       {/* Thumb */}
                       <div className="w-12 h-12 rounded bg-white/5 flex-shrink-0 overflow-hidden">
@@ -243,25 +241,25 @@ export default function AdminPage() {
                         <img src={item.previewUrl} alt="" className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white/60 text-sm truncate">{item.file.name}</p>
-                        <p className="text-white/25 text-xs mt-0.5">
+                        <p className="text-neutral-200 text-sm truncate">{item.file.name}</p>
+                        <p className="text-neutral-400 text-xs mt-0.5">
                           {(item.file.size / 1024 / 1024).toFixed(1)} MB
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {item.status === 'uploading' && (
-                          <span className="text-xs text-white/30 animate-pulse">uploading…</span>
+                          <span className="text-xs text-neutral-400 animate-pulse">uploading…</span>
                         )}
                         {item.status === 'done' && (
-                          <span className="text-xs text-white/40">✓ uploaded</span>
+                          <span className="text-xs text-neutral-300">✓ uploaded</span>
                         )}
                         {item.status === 'error' && (
-                          <span className="text-xs text-red-400/70">{item.error}</span>
+                          <span className="text-xs text-rose-300">{item.error}</span>
                         )}
                         {item.status !== 'uploading' && (
                           <button
                             onClick={() => removeFromQueue(item.id)}
-                            className="text-white/20 hover:text-white/60 text-lg leading-none transition-colors"
+                            className="text-neutral-500 hover:text-neutral-100 text-lg leading-none transition-colors"
                           >×</button>
                         )}
                       </div>
@@ -271,21 +269,21 @@ export default function AdminPage() {
                     {item.status === 'pending' && (
                       <div className="border-t border-white/5 divide-y divide-white/5">
                         <div className="px-4 py-2.5 flex items-center gap-3">
-                          <span className="text-white/25 text-xs w-24 flex-shrink-0">Location</span>
+                          <span className="text-neutral-400 text-xs w-24 flex-shrink-0">Location</span>
                           <input
                             value={item.locationName}
                             onChange={(e) => updateQueued(item.id, 'locationName', e.target.value)}
                             placeholder="Enter location name"
-                            className="flex-1 bg-transparent text-white/60 text-sm outline-none border-b border-white/10 focus:border-white/30 placeholder:text-white/20 transition-colors pb-0.5"
+                            className="flex-1 bg-transparent text-neutral-200 text-sm outline-none border-b border-white/10 focus:border-white/30 placeholder:text-neutral-500 transition-colors pb-0.5"
                           />
                         </div>
                         <div className="px-4 py-2.5 flex items-center gap-3">
-                          <span className="text-white/25 text-xs w-24 flex-shrink-0">Caption</span>
+                          <span className="text-neutral-400 text-xs w-24 flex-shrink-0">Caption</span>
                           <input
                             value={item.caption}
                             onChange={(e) => updateQueued(item.id, 'caption', e.target.value)}
                             placeholder="Optional caption…"
-                            className="flex-1 bg-transparent text-white/60 text-sm outline-none border-b border-white/10 focus:border-white/30 placeholder:text-white/20 transition-colors pb-0.5"
+                            className="flex-1 bg-transparent text-neutral-200 text-sm outline-none border-b border-white/10 focus:border-white/30 placeholder:text-neutral-500 transition-colors pb-0.5"
                           />
                         </div>
                       </div>
@@ -300,14 +298,14 @@ export default function AdminPage() {
               <button
                 onClick={handleUploadAll}
                 disabled={isPending}
-                className="w-full py-3 bg-white/8 hover:bg-white/12 border border-white/10 rounded-lg text-white/60 hover:text-white/80 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg text-neutral-200 hover:text-white text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isPending ? 'Uploading…' : `Upload ${pendingCount} photo${pendingCount !== 1 ? 's' : ''}`}
               </button>
             )}
 
             {queue.length === 0 && (
-              <p className="text-white/15 text-xs text-center mt-2">No photos queued</p>
+              <p className="text-neutral-500 text-xs text-center mt-2">No photos queued</p>
             )}
           </>
         )}
@@ -316,10 +314,10 @@ export default function AdminPage() {
         {tab === 'library' && (
           <div className="space-y-8">
             {loadingLibrary && (
-              <p className="text-white/25 text-sm text-center py-8">Loading…</p>
+              <p className="text-neutral-400 text-sm text-center py-8">Loading…</p>
             )}
             {!loadingLibrary && dbPhotos.length === 0 && (
-              <p className="text-white/20 text-sm text-center py-8">No photos yet</p>
+              <p className="text-neutral-500 text-sm text-center py-8">No photos yet</p>
             )}
             {!loadingLibrary && (() => {
               const groups = new Map<string, AdminPhotoRow[]>();
@@ -331,8 +329,8 @@ export default function AdminPage() {
               return Array.from(groups.entries()).map(([locName, photos]) => (
                 <div key={locName}>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-white/50 text-xs tracking-widest uppercase">{locName}</span>
-                    <span className="text-white/15 text-xs">{photos.length} photo{photos.length !== 1 ? 's' : ''}</span>
+                    <span className="text-neutral-200 text-xs tracking-widest uppercase">{locName}</span>
+                    <span className="text-neutral-500 text-xs">{photos.length} photo{photos.length !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="space-y-1">
                     {photos.map((photo) => {
@@ -350,8 +348,8 @@ export default function AdminPage() {
                               <img src={photo.r2_thumb_url} alt="" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-white/35 text-xs truncate">{photo.filename}</p>
-                              <p className="text-white/15 text-xs">
+                              <p className="text-neutral-400 text-xs truncate">{photo.filename}</p>
+                              <p className="text-neutral-500 text-xs">
                                 {photo.date_taken
                                   ? new Date(photo.date_taken).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                                   : '—'}
@@ -367,8 +365,8 @@ export default function AdminPage() {
                               }}
                               className={`text-xs px-2 py-0.5 rounded border flex-shrink-0 transition-colors ${
                                 isLive
-                                  ? 'text-white/40 border-white/15 hover:border-white/30'
-                                  : 'text-white/20 border-white/8 hover:border-white/20'
+                                  ? 'text-neutral-300 border-white/15 hover:border-white/30'
+                                  : 'text-neutral-500 border-white/10 hover:border-white/20'
                               }`}
                             >
                               {isLive ? 'live' : 'draft'}
@@ -376,7 +374,7 @@ export default function AdminPage() {
                             {/* Preview */}
                             <button
                               onClick={() => setPreviewId(photo.id)}
-                              className="text-white/15 hover:text-white/45 transition-colors flex-shrink-0 p-1"
+                              className="text-neutral-500 hover:text-neutral-200 transition-colors flex-shrink-0 p-1"
                               title="Preview"
                             >
                               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -387,7 +385,7 @@ export default function AdminPage() {
                             {/* Pencil */}
                             <button
                               onClick={() => setEditingId(editingId === photo.id ? null : photo.id)}
-                              className={`transition-colors flex-shrink-0 p-1 ${editingId === photo.id ? 'text-white/50' : 'text-white/15 hover:text-white/45'}`}
+                              className={`transition-colors flex-shrink-0 p-1 ${editingId === photo.id ? 'text-neutral-200' : 'text-neutral-500 hover:text-neutral-200'}`}
                               title="Edit details"
                             >
                               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -402,19 +400,19 @@ export default function AdminPage() {
                                     setDbPhotos((prev) => prev.filter((p) => p.id !== photo.id));
                                     setDeletingId(null);
                                   }}
-                                  className="text-xs px-2 py-0.5 rounded border border-red-500/40 text-red-400/80 hover:border-red-500/70 transition-colors"
+                                  className="text-xs px-2 py-0.5 rounded border border-red-500/40 text-rose-300 hover:border-red-500/70 transition-colors"
                                 >
                                   confirm
                                 </button>
                                 <button
                                   onClick={() => setDeletingId(null)}
-                                  className="text-white/20 hover:text-white/50 text-lg leading-none transition-colors px-1"
+                                  className="text-neutral-500 hover:text-neutral-200 text-lg leading-none transition-colors px-1"
                                 >×</button>
                               </div>
                             ) : (
                               <button
                                 onClick={() => setDeletingId(photo.id)}
-                                className="text-white/15 hover:text-red-400/60 transition-colors flex-shrink-0 p-1"
+                                className="text-neutral-500 hover:text-rose-300 transition-colors flex-shrink-0 p-1"
                                 title="Delete photo"
                               >
                                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -428,7 +426,7 @@ export default function AdminPage() {
                           {editingId === photo.id && (
                           <div className="border-t border-white/5 divide-y divide-white/5">
                             <div className="px-3 py-2 flex items-center gap-3">
-                              <span className="text-white/20 text-xs w-16 flex-shrink-0">Location</span>
+                              <span className="text-neutral-500 text-xs w-16 flex-shrink-0">Location</span>
                               <input
                                 defaultValue={photo.location_name ?? ''}
                                 onBlur={async (e) => {
@@ -440,19 +438,19 @@ export default function AdminPage() {
                                   );
                                 }}
                                 placeholder="Enter location…"
-                                className="flex-1 bg-transparent text-white/55 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-white/15 transition-colors pb-0.5"
+                                className="flex-1 bg-transparent text-neutral-200 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-neutral-500 transition-colors pb-0.5"
                               />
                               {photo.lat != null && (
-                                <span className="text-white/30 text-xs flex-shrink-0" title={`${photo.lat?.toFixed(4)}, ${photo.lng?.toFixed(4)}`}>📍</span>
+                                <span className="text-neutral-400 flex-shrink-0" title={`${photo.lat?.toFixed(4)}, ${photo.lng?.toFixed(4)}`}><IconPin className="h-4 w-4" /><span className="sr-only">Has map coordinates</span></span>
                               )}
                             </div>
                             <div className="px-3 py-2 flex items-center gap-3">
-                              <span className="text-white/20 text-xs w-16 flex-shrink-0">Caption</span>
+                              <span className="text-neutral-500 text-xs w-16 flex-shrink-0">Caption</span>
                               <input
                                 defaultValue={photo.caption ?? ''}
                                 onBlur={(e) => setPhotoCaption(photo.id, e.target.value)}
                                 placeholder="Add caption…"
-                                className="flex-1 bg-transparent text-white/55 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-white/15 transition-colors pb-0.5"
+                                className="flex-1 bg-transparent text-neutral-200 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-neutral-500 transition-colors pb-0.5"
                               />
                             </div>
                           </div>
@@ -479,14 +477,14 @@ export default function AdminPage() {
         const isLive = photo.status === 'published';
         return (
           <div
-            className="fixed inset-0 z-50 bg-black/92 backdrop-blur-sm flex flex-col"
+            className="fixed inset-0 z-[1000] bg-black/90 backdrop-blur-sm flex flex-col"
             onClick={() => setPreviewId(null)}
           >
             {/* Top bar */}
-            <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/8" onClick={(e) => e.stopPropagation()}>
-              <span className="text-white/30 text-xs truncate max-w-xs">{photo.filename}</span>
+            <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-b border-white/10" onClick={(e) => e.stopPropagation()}>
+              <span className="text-neutral-400 text-xs truncate max-w-xs">{photo.filename}</span>
               <div className="flex items-center gap-3">
-                <span className="text-white/20 text-xs">{idx + 1} / {dbPhotos.length}</span>
+                <span className="text-neutral-500 text-xs">{idx + 1} / {dbPhotos.length}</span>
                 <button
                   onClick={async () => {
                     const next = isLive ? 'draft' : 'published';
@@ -494,12 +492,12 @@ export default function AdminPage() {
                     setDbPhotos((prev) => prev.map((p) => p.id === photo.id ? { ...p, status: next } : p));
                   }}
                   className={`text-xs px-2 py-0.5 rounded border transition-colors ${
-                    isLive ? 'text-white/40 border-white/15 hover:border-white/30' : 'text-white/20 border-white/8 hover:border-white/20'
+                    isLive ? 'text-neutral-300 border-white/15 hover:border-white/30' : 'text-neutral-500 border-white/10 hover:border-white/20'
                   }`}
                 >
                   {isLive ? 'live' : 'draft'}
                 </button>
-                <button onClick={() => setPreviewId(null)} className="text-white/30 hover:text-white/70 text-2xl leading-none transition-colors">×</button>
+                <button onClick={() => setPreviewId(null)} className="text-neutral-400 hover:text-white text-2xl leading-none transition-colors">×</button>
               </div>
             </div>
 
@@ -510,22 +508,22 @@ export default function AdminPage() {
               {hasPrev && (
                 <button
                   onClick={() => setPreviewId(dbPhotos[idx - 1].id)}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/80 text-white/50 hover:text-white/90 text-xl transition-colors"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/80 text-neutral-200 hover:text-white text-xl transition-colors"
                 >‹</button>
               )}
               {hasNext && (
                 <button
                   onClick={() => setPreviewId(dbPhotos[idx + 1].id)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/80 text-white/50 hover:text-white/90 text-xl transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/80 text-neutral-200 hover:text-white text-xl transition-colors"
                 >›</button>
               )}
             </div>
 
             {/* Edit bar */}
-            <div className="flex-shrink-0 border-t border-white/8 px-4 py-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex-shrink-0 border-t border-white/10 px-4 py-3" onClick={(e) => e.stopPropagation()}>
               <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-white/20 text-xs w-14 flex-shrink-0">Location</span>
+                  <span className="text-neutral-500 text-xs w-14 flex-shrink-0">Location</span>
                   <input
                     key={photo.id + '-loc'}
                     defaultValue={photo.location_name ?? ''}
@@ -534,20 +532,20 @@ export default function AdminPage() {
                       setDbPhotos((prev) => prev.map((p) => p.id === photo.id ? { ...p, location_name: e.target.value || null, lat, lng } : p));
                     }}
                     placeholder="Enter location…"
-                    className="flex-1 bg-transparent text-white/60 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-white/15 transition-colors pb-0.5"
+                    className="flex-1 bg-transparent text-neutral-200 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-neutral-500 transition-colors pb-0.5"
                   />
                   {photo.lat != null && (
-                    <span className="text-white/30 text-xs flex-shrink-0" title={`${photo.lat?.toFixed(4)}, ${photo.lng?.toFixed(4)}`}>📍</span>
+                    <span className="text-neutral-400 flex-shrink-0" title={`${photo.lat?.toFixed(4)}, ${photo.lng?.toFixed(4)}`}><IconPin className="h-4 w-4" /><span className="sr-only">Has map coordinates</span></span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className="text-white/20 text-xs w-14 flex-shrink-0">Caption</span>
+                  <span className="text-neutral-500 text-xs w-14 flex-shrink-0">Caption</span>
                   <input
                     key={photo.id + '-cap'}
                     defaultValue={photo.caption ?? ''}
                     onBlur={(e) => setPhotoCaption(photo.id, e.target.value)}
                     placeholder="Add caption…"
-                    className="flex-1 bg-transparent text-white/60 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-white/15 transition-colors pb-0.5"
+                    className="flex-1 bg-transparent text-neutral-200 text-sm outline-none border-b border-transparent focus:border-white/20 hover:border-white/10 placeholder:text-neutral-500 transition-colors pb-0.5"
                   />
                 </div>
               </div>

@@ -12,11 +12,26 @@ export interface PhotoRow {
   date_taken: string | null;
 }
 
+/** Photos uploaded without a place are grouped under this name. It is never shown to visitors. */
+export const UNKNOWN_LOCATION = 'Unknown';
+
+/** A location's name for display, or null when the photo has no place attached. */
+export function placeName(location: Location): string | null {
+  return location.name && location.name !== UNKNOWN_LOCATION ? location.name : null;
+}
+
+/** Text alternative for a photo: its caption if it has one, otherwise where it was taken. */
+export function photoAlt(photo: Photo, location: Location): string {
+  const place = placeName(location);
+  if (photo.caption) return place ? `${photo.caption}, ${place}` : photo.caption;
+  return place ? `Photo taken in ${place}` : 'Photo';
+}
+
 export function rowsToLocations(rows: PhotoRow[]): Location[] {
   const map = new Map<string, Location>();
 
   for (const row of rows) {
-    const name = (row.location_name ?? 'Unknown').trim();
+    const name = (row.location_name ?? UNKNOWN_LOCATION).trim();
     if (!map.has(name)) {
       map.set(name, {
         id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),

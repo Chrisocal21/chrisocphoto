@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,30 +33,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-xs flex flex-col gap-4"
-      >
-        <h1 className="text-white text-xl font-semibold text-center tracking-wide">Admin</h1>
+    <main id="main" className="safe-x flex min-h-dvh flex-col items-center justify-center py-16">
+      <form onSubmit={handleSubmit} className="flex w-full max-w-xs animate-rise flex-col">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/mark.webp" width={56} height={56} alt="" className="mx-auto h-14 w-14" />
+        <h1 className="mt-6 text-center font-display text-2xl font-light text-white">Admin</h1>
+        <p className="mt-2 text-center text-sm text-neutral-400">Staff only. (It’s a staff of one.)</p>
+
+        <label htmlFor="password" className="sr-only">
+          Password
+        </label>
         <input
+          id="password"
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? 'login-error' : undefined}
           autoFocus
           required
-          className="bg-zinc-900 text-white border border-zinc-700 rounded px-4 py-3 text-base outline-none focus:border-zinc-400"
+          className="field mt-8"
         />
-        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-white text-black rounded py-3 text-sm font-medium disabled:opacity-50"
-        >
+        <p id="login-error" role="alert" className="min-h-6 pt-2 text-center text-sm text-rose-300">
+          {error}
+        </p>
+        <button type="submit" disabled={loading} className="button-primary mt-2 w-full py-3">
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-    </div>
+
+      <Link href="/" className="text-link mt-10 text-sm">
+        Back to the photos
+      </Link>
+    </main>
   );
 }

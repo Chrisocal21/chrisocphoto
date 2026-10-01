@@ -16,6 +16,7 @@ Right now, public submissions are enabled for:
 
 - `probablyfinestudios`
 - `fieldkit`
+- `chrisocphoto` (this site; checked against the live worker on October 1, 2026)
 
 Other sites must be added in the worker before their forms can submit.
 

@@ -1,154 +1,146 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useId, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { site } from '@/lib/site';
+import { IconArrowUpRight, IconGrid, IconInfo, IconInstagram, IconMail, IconMap, IconUser } from './icons';
+
+const PAGES = [
+  { label: 'Grid', href: '/', icon: IconGrid },
+  { label: 'Map', href: '/map', icon: IconMap },
+  { label: 'About', href: '/about', icon: IconInfo },
+  { label: 'Contact', href: '/contact', icon: IconMail },
+];
 
 const EXTERNAL_LINKS = [
-  { label: 'Instagram', href: 'https://instagram.com/chrisocphoto' },
+  { label: 'Instagram', href: site.links.instagram, icon: IconInstagram },
   // Add more external links here
 ];
+
+const item = 'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors duration-150';
+const itemIdle = 'text-neutral-300 hover:bg-white/[0.06] hover:text-white';
+const itemIcon = 'h-[18px] w-[18px] shrink-0 text-neutral-500 transition-colors duration-150 group-hover:text-neutral-300';
 
 export default function Menu() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
   const pathname = usePathname();
-  const onMap = pathname === '/map';
-  const onAdmin = pathname === '/admin';
 
-  // Close on click outside
+  // Close after navigating
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Close on click outside, on ESC, and when keyboard focus moves on past the menu
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+    const outside = (target: EventTarget | null) => !ref.current?.contains(target as Node);
+    const onPointerDown = (e: PointerEvent) => {
+      if (outside(e.target)) setOpen(false);
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    const onFocusIn = (e: FocusEvent) => {
+      if (outside(e.target)) setOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('focusin', onFocusIn);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('focusin', onFocusIn);
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, [open]);
 
-  // Close on ESC
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [open]);
+  const onAdmin = pathname.startsWith('/admin');
 
   return (
-    <div ref={ref} className="fixed top-5 right-5 z-[500]">
+    <div ref={ref} className="relative">
       {/* Toggle button */}
       <button
+        ref={buttonRef}
+        type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-9 h-9 flex flex-col items-center justify-center gap-[5px] rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:border-white/25 transition-colors group"
-        aria-label="Menu"
+        className="chrome-button flex-col gap-[5px]"
+        aria-label={open ? 'Close menu' : 'Open menu'}
+        aria-expanded={open}
+        aria-controls={open ? panelId : undefined}
       >
-        <span className={`block w-4 h-px bg-white/60 transition-all duration-200 ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
-        <span className={`block w-4 h-px bg-white/60 transition-all duration-200 ${open ? 'opacity-0' : ''}`} />
-        <span className={`block w-4 h-px bg-white/60 transition-all duration-200 ${open ? '-translate-y-[6px] -rotate-45' : ''}`} />
+        <span className={`block h-px w-4 bg-current transition-transform duration-200 ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
+        <span className={`block h-px w-4 bg-current transition-opacity duration-200 ${open ? 'opacity-0' : ''}`} />
+        <span className={`block h-px w-4 bg-current transition-transform duration-200 ${open ? '-translate-y-[6px] -rotate-45' : ''}`} />
       </button>
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute top-11 right-0 w-48 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden shadow-xl">
-          {/* Logo */}
-          <div className="px-3 pt-3 pb-2 border-b border-white/8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/Logo-Vertical.png" alt="ChrisOCPhoto" className="w-full" style={{ mixBlendMode: 'screen', filter: 'brightness(1.1) contrast(1.05)' }} />
-          </div>
-          <nav className="py-1.5">
-            {(onMap || onAdmin) && (
-              <Link
-                href="/"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
-                  <rect x="1" y="1" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-                  <rect x="7.5" y="1" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-                  <rect x="1" y="7.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-                  <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-                </svg>
-                Grid
-              </Link>
-            )}
-            {(!onMap) && (
-              <Link
-                href="/map"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
-                  <path d="M1 3.5L5 2L9 4L13 2.5V11L9 12.5L5 10.5L1 12V3.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" fill="none"/>
-                  <circle cx="5" cy="6" r="1.2" fill="currentColor"/>
-                </svg>
-                Map
-              </Link>
-            )}
+        <nav
+          id={panelId}
+          aria-label="Site"
+          className="absolute right-0 top-12 w-60 origin-top-right animate-pop rounded-2xl border border-white/10 bg-neutral-950/90 p-1.5 shadow-2xl shadow-black/70 backdrop-blur-xl"
+        >
+          <ul>
+            {PAGES.map(({ label, href, icon: PageIcon }) => {
+              const current = pathname === href;
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    aria-current={current ? 'page' : undefined}
+                    className={`${item} ${current ? 'bg-white/[0.07] text-white' : itemIdle}`}
+                  >
+                    <PageIcon className={current ? 'h-[18px] w-[18px] shrink-0 text-white' : itemIcon} />
+                    <span className="flex-1">{label}</span>
+                    {current && <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-spectrum" />}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
 
-            <Link
-              href="/about"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
-                <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/>
-                <circle cx="7" cy="4.5" r="0.8" fill="currentColor"/>
-                <path d="M7 6.5v4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-              </svg>
-              About
-            </Link>
+          <div className="mx-3 my-1.5 h-px bg-white/[0.08]" />
 
-            <Link
-              href="/contact"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
-                <path d="M2 3h10c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1H2c-.55 0-1-.45-1-1V4c0-.55.45-1 1-1z" stroke="currentColor" strokeWidth="1.2" fill="none"/>
-                <path d="M1 4l6 4 6-4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              </svg>
-              Contact
-            </Link>
-
-            <div className="h-px bg-white/8 mx-3 my-1" />
-
-            {EXTERNAL_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
-                  <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" strokeWidth="1.5"/>
-                  <circle cx="7" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-                  <circle cx="10.5" cy="3.5" r="0.75" fill="currentColor"/>
-                </svg>
-                {link.label}
-              </a>
+          <ul>
+            {EXTERNAL_LINKS.map(({ label, href, icon: LinkIcon }) => (
+              <li key={href}>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                  className={`${item} ${itemIdle}`}
+                >
+                  <LinkIcon className={itemIcon} />
+                  <span className="flex-1">
+                    {label}
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </span>
+                  <IconArrowUpRight className="h-4 w-4 text-neutral-500 transition-colors duration-150 group-hover:text-neutral-300" />
+                </a>
+              </li>
             ))}
+          </ul>
 
-            <div className="h-px bg-white/8 mx-3 my-1" />
+          <div className="mx-3 my-1.5 h-px bg-white/[0.08]" />
 
-            <Link
-              href="/admin"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="opacity-50">
-                <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M1.5 12.5c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-              Admin
-            </Link>
-          </nav>
-        </div>
+          <Link
+            href="/admin"
+            rel="nofollow"
+            onClick={() => setOpen(false)}
+            aria-current={onAdmin ? 'page' : undefined}
+            className={`${item} ${onAdmin ? 'bg-white/[0.07] text-white' : 'text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200'}`}
+          >
+            <IconUser className={onAdmin ? 'h-[18px] w-[18px] shrink-0 text-white' : itemIcon} />
+            Admin
+          </Link>
+        </nav>
       )}
     </div>
   );

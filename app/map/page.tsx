@@ -1,24 +1,29 @@
+import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import Menu from '../components/Menu';
+import SiteHeader from '../components/SiteHeader';
+import { getInitialPhotos } from '@/lib/photo-store';
+import { pageMetadata } from '@/lib/site';
 
 const MapView = dynamic(() => import('../components/MapView'), { ssr: false });
 
-export default function MapPage() {
+export const metadata: Metadata = pageMetadata({
+  title: 'Map',
+  description: 'Every place Chris has pointed a camera at, pinned on a map. Pick a pin to see the photos taken there.',
+  path: '/map',
+});
+
+export default async function MapPage() {
+  const rows = await getInitialPhotos();
+
   return (
-    <main className="fixed inset-0">
-      <MapView />
-      {/* Back to grid */}
-      <Link
-        href="/"
-        className="fixed top-5 left-5 z-[500] w-9 h-9 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/10 hover:border-white/25 transition-colors text-white/60 hover:text-white"
-        aria-label="Back to photos"
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </Link>
-      <Menu />
-    </main>
+    // The plain wrapper gives Next.js an ordinary element to anchor to on navigation. Without it the
+    // first elements are both position: fixed, which it warns about in development.
+    <div>
+      <SiteHeader variant="overlay" back={{ href: '/', label: 'Back to photos' }} />
+      <main id="main" className="fixed inset-0 bg-black">
+        <h1 className="sr-only">Map of where the photos were taken</h1>
+        <MapView initialRows={rows} />
+      </main>
+    </div>
   );
 }
